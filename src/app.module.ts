@@ -11,6 +11,7 @@ import { CommunityAlertsModule } from './community_alerts/community_alerts.modul
 import { ReputationModule } from './reputation/reputation.module';
 import { SmsModule } from './sms/sms.module';
 import { SocketHandlerModule } from './socket_handler/socket_handler.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { SocketHandlerModule } from './socket_handler/socket_handler.module';
     ReputationModule,
     SmsModule,
     SocketHandlerModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

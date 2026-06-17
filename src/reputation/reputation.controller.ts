@@ -16,22 +16,22 @@ import { UpdateReputationDto } from './dto/update-reputation.dto';
 export class ReputationController {
   constructor(private readonly reputationService: ReputationService) {}
 
-  @Post()
+  @Post('/create')
   create(@Body() createReputationDto: CreateReputationDto) {
     return this.reputationService.create(createReputationDto);
   }
 
-  @Get()
+  @Get('/find-all')
   findAll() {
     return this.reputationService.findAll();
   }
 
-  @Get(':id')
+  @Get('/find-one/:id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.reputationService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch('/update/:id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateReputationDto: UpdateReputationDto,
@@ -39,7 +39,7 @@ export class ReputationController {
     return this.reputationService.update(id, updateReputationDto);
   }
 
-  @Delete(':id')
+  @Delete('/delete/:id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.reputationService.remove(id);
   }

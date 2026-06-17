@@ -15,7 +15,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('/resgister')
+  @Post('/register')
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
@@ -37,7 +37,7 @@ export class UsersController {
 
   @Delete('/delete/:id')
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.usersService.deleteUser(+id);
   }
   @Get('/find-community/:id')
   findUserWithCommunity(@Param('id') id: string) {

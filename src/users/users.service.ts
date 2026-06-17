@@ -9,19 +9,34 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Future, NetResponse, ResponseHelper } from 'src/helpers/net-response';
+import * as bcrypt from 'bcrypt';
+import { ReputationService } from 'src/reputation/reputation.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly reputationService: ReputationService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Future<NetResponse> {
     try {
       const user = this.userRepository.create(createUserDto);
-      await this.userRepository.save(user);
-      return ResponseHelper.success<User>('User created successfully', user);
+      const hashPassword = await bcrypt.hash(createUserDto.password, 10);
+      user.password = hashPassword;
+      const savedUser = await this.userRepository.save(user);
+      await this.reputationService.create({
+        user_id: savedUser.id,
+        reputation_count: 0,
+      });
+      return ResponseHelper.success<User & { reputation_count: number }>(
+        'User created successfully',
+        {
+          ...savedUser,
+          reputation_count: 0,
+        },
+      );
     } catch (error) {
       return ResponseHelper.fromError(error);
     }
@@ -63,12 +78,14 @@ export class UsersService {
     }
   }
 
-  async remove(id: number) {
+  async deleteUser(id: number) {
     try {
       const user = await this.userRepository.findOneBy({ id });
-      if (!user)
+      if (!user) {
         return ResponseHelper.error<User>(`User with ID ${id} not found`);
+      }
       await this.userRepository.remove(user);
+      return ResponseHelper.success<User>('User removed successfully', user);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(
