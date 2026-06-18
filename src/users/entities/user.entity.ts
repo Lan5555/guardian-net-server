@@ -29,6 +29,9 @@ export class User {
   @JoinColumn({ name: 'community_id' })
   community!: Community;
 
+  @Column({ name: 'phone', unique: true })
+  phone!: string;
+
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;
 }

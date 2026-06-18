@@ -5,12 +5,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CommunityAlert } from './entities/community_alert.entity';
 import { Future, NetResponse, ResponseHelper } from 'src/helpers/net-response';
+import { AlertGateway } from 'src/gateway/gateway';
 
 @Injectable()
 export class CommunityAlertsService {
   constructor(
     @InjectRepository(CommunityAlert)
     private readonly communityAlertRepository: Repository<CommunityAlert>,
+    private readonly alertGateway: AlertGateway,
   ) {}
 
   async create(
@@ -21,6 +23,8 @@ export class CommunityAlertsService {
         createCommunityAlertDto,
       );
       await this.communityAlertRepository.save(alert);
+      this.alertGateway.sendAlert(createCommunityAlertDto);
+
       return ResponseHelper.success<CommunityAlert>(
         'Community alert created successfully',
         alert,

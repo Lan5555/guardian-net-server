@@ -22,7 +22,16 @@ export class CreateCommunityAlertDto {
   @MaxLength(255)
   message?: string;
 
+  @IsString()
+  location!: string;
+
   @IsInt()
   @IsNotEmpty()
   community_id!: number;
+
+  @IsString()
+  reporter!: string;
+
+  @IsInt()
+  reported_id!: number;
 }

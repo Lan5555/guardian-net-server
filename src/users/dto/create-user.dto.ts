@@ -23,4 +23,8 @@ export class CreateUserDto {
   @IsNumber()
   @IsOptional()
   community_id?: number;
+
+  @IsString()
+  @IsOptional()
+  phone!: string;
 }

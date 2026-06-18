@@ -25,6 +25,12 @@ export class CommunityAlert {
   @Column({ length: 150, nullable: true })
   location!: string;
 
+  @Column({ length: 100 })
+  reporter!: string;
+
+  @Column({ name: 'reported_id' })
+  reported_id!: number;
+
   @ManyToOne(() => Community)
   @JoinColumn({ name: 'community_id' })
   community_id!: number;

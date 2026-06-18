@@ -3,9 +3,10 @@ import { CommunityAlertsService } from './community_alerts.service';
 import { CommunityAlertsController } from './community_alerts.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommunityAlert } from './entities/community_alert.entity';
+import { GatewayModule } from 'src/gateway/gateway.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CommunityAlert])],
+  imports: [TypeOrmModule.forFeature([CommunityAlert]), GatewayModule],
   controllers: [CommunityAlertsController],
   providers: [CommunityAlertsService],
 })

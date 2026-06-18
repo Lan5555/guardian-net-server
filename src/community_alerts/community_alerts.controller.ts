@@ -18,22 +18,22 @@ export class CommunityAlertsController {
     private readonly communityAlertsService: CommunityAlertsService,
   ) {}
 
-  @Post()
+  @Post('/create')
   create(@Body() createCommunityAlertDto: CreateCommunityAlertDto) {
     return this.communityAlertsService.create(createCommunityAlertDto);
   }
 
-  @Get()
+  @Get('/find-all')
   findAll() {
     return this.communityAlertsService.findAll();
   }
 
-  @Get(':id')
+  @Get('/find-one/:id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.communityAlertsService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch('/update/:id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateCommunityAlertDto: UpdateCommunityAlertDto,
@@ -41,7 +41,7 @@ export class CommunityAlertsController {
     return this.communityAlertsService.update(id, updateCommunityAlertDto);
   }
 
-  @Delete(':id')
+  @Delete('/delete/:id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.communityAlertsService.remove(id);
   }

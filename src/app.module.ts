@@ -12,6 +12,7 @@ import { ReputationModule } from './reputation/reputation.module';
 import { SmsModule } from './sms/sms.module';
 import { SocketHandlerModule } from './socket_handler/socket_handler.module';
 import { AuthModule } from './auth/auth.module';
+import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AuthModule } from './auth/auth.module';
     SmsModule,
     SocketHandlerModule,
     AuthModule,
+    GatewayModule,
   ],
   controllers: [AppController],
   providers: [AppService],
