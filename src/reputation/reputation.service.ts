@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateReputationDto } from './dto/create-reputation.dto';
 import { UpdateReputationDto } from './dto/update-reputation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -39,22 +39,47 @@ export class ReputationService {
   }
 
   async findOne(id: number) {
-    const reputation = await this.reputationRepository.findOneBy({ id });
-    if (!reputation) throw new NotFoundException(`Reputation #${id} not found`);
-    return reputation;
+    try {
+      const reputation = await this.reputationRepository.findOneBy({ id });
+      if (!reputation) {
+        return ResponseHelper.error<Reputation>('Reputation not found');
+      }
+      return ResponseHelper.success<Reputation>(
+        'Queried Successfully',
+        reputation,
+      );
+    } catch (e) {
+      return ResponseHelper.fromError(e);
+    }
   }
 
   async update(id: number, updateReputationDto: UpdateReputationDto) {
-    const reputation = await this.reputationRepository.preload({
-      id,
-      ...updateReputationDto,
-    });
-    if (!reputation) throw new NotFoundException(`Reputation #${id} not found`);
-    return await this.reputationRepository.save(reputation);
+    try {
+      const reputation = await this.reputationRepository.preload({
+        id,
+        ...updateReputationDto,
+      });
+      if (!reputation) {
+        return ResponseHelper.error('Reputation not found');
+      }
+      await this.reputationRepository.save(reputation);
+      return ResponseHelper.success<Reputation>(
+        'Updated Successfully',
+        reputation,
+      );
+    } catch (e) {
+      return ResponseHelper.error(e as string);
+    }
   }
 
-  async remove(id: number) {
-    const reputation = await this.findOne(id);
-    return await this.reputationRepository.remove(reputation);
+  async remove(id: number): Future<NetResponse> {
+    try {
+      const reputation = await this.reputationRepository.findOneBy({ id });
+      if (!reputation) return ResponseHelper.error('Reputation not found');
+      await this.reputationRepository.remove(reputation);
+      return ResponseHelper.success('Deleted Successfully', null);
+    } catch (e) {
+      return ResponseHelper.error(e as string);
+    }
   }
 }

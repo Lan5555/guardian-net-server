@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCommunityAlertDto } from './dto/create-community_alert.dto';
 import { UpdateCommunityAlertDto } from './dto/update-community_alert.dto';
@@ -6,6 +7,7 @@ import { Repository } from 'typeorm';
 import { CommunityAlert } from './entities/community_alert.entity';
 import { Future, NetResponse, ResponseHelper } from 'src/helpers/net-response';
 import { AlertGateway } from 'src/gateway/gateway';
+import { Reputation } from 'src/reputation/entities/reputation.entity';
 
 @Injectable()
 export class CommunityAlertsService {
@@ -13,6 +15,8 @@ export class CommunityAlertsService {
     @InjectRepository(CommunityAlert)
     private readonly communityAlertRepository: Repository<CommunityAlert>,
     private readonly alertGateway: AlertGateway,
+    @InjectRepository(Reputation)
+    private readonly reputationRepository: Repository<Reputation>,
   ) {}
 
   async create(
@@ -23,7 +27,7 @@ export class CommunityAlertsService {
         createCommunityAlertDto,
       );
       await this.communityAlertRepository.save(alert);
-      this.alertGateway.sendAlert(createCommunityAlertDto);
+      this.alertGateway.sendAlert(alert);
 
       return ResponseHelper.success<CommunityAlert>(
         'Community alert created successfully',
@@ -64,5 +68,46 @@ export class CommunityAlertsService {
   async remove(id: number) {
     const alert = await this.findOne(id);
     return await this.communityAlertRepository.remove(alert);
+  }
+  async confirmAlert(userId: number, alertId: number): Future<NetResponse> {
+    try {
+      const alert = await this.communityAlertRepository.findOneBy({
+        id: alertId,
+      });
+      if (!alert) return ResponseHelper.error('No alert found');
+      if (alert.reported_id === userId)
+        return ResponseHelper.error('Reporter cant confirm alert');
+      const reputation = await this.reputationRepository.findOneBy({
+        user_id: userId,
+      });
+      if (!reputation) return ResponseHelper.error('Reputation not found');
+      reputation.reputation_count += 10;
+      await this.reputationRepository.save(reputation);
+      return ResponseHelper.success<Reputation | null>(
+        'Confirmed Alert successfully',
+        null,
+      );
+    } catch (e) {
+      return ResponseHelper.error(e as string);
+    }
+  }
+
+  async flagAsFalse(alertId: number): Future<NetResponse> {
+    try {
+      const alert = await this.communityAlertRepository.findOne({
+        where: { id: alertId },
+        relations: {
+          community_id: true,
+        } as any,
+      });
+      if (!alert) return ResponseHelper.error('Community Alert not found');
+      const alertDataCopy = { ...alert };
+      this.alertGateway.removeAlert(alertDataCopy);
+      await this.communityAlertRepository.remove(alert);
+
+      return ResponseHelper.success('Alert flagged as false', null);
+    } catch (e) {
+      return ResponseHelper.error(e as string);
+    }
   }
 }

@@ -35,6 +35,9 @@ export class CommunityAlert {
   @JoinColumn({ name: 'community_id' })
   community_id!: number;
 
+  @Column()
+  isVerified!: boolean;
+
   @CreateDateColumn({ name: 'createdAt' })
   createdAt!: Date;
 }

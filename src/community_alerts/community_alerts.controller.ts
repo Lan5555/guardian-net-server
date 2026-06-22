@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { CommunityAlertsService } from './community_alerts.service';
 import { CreateCommunityAlertDto } from './dto/create-community_alert.dto';
@@ -44,5 +45,16 @@ export class CommunityAlertsController {
   @Delete('/delete/:id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.communityAlertsService.remove(id);
+  }
+  @Get('/comfirm-alert')
+  comfirmAlert(
+    @Query('userId', ParseIntPipe) userId: number,
+    @Query('alertId', ParseIntPipe) alertId: number,
+  ) {
+    return this.communityAlertsService.confirmAlert(userId, alertId);
+  }
+  @Get('/flag-as-false')
+  flagAsFalse(@Query('alertId', ParseIntPipe) alertId: number) {
+    return this.communityAlertsService.flagAsFalse(alertId);
   }
 }
