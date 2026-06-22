@@ -35,6 +35,7 @@ export class AuthService {
           email: user.email,
           community_id: user.community_id,
           reputation_count: reputation?.reputation_count,
+          phone: user.phone,
         } as User & { reputation_count: number },
       );
     } else {
