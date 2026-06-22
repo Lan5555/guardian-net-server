@@ -57,4 +57,11 @@ export class CommunityAlertsController {
   flagAsFalse(@Query('alertId', ParseIntPipe) alertId: number) {
     return this.communityAlertsService.flagAsFalse(alertId);
   }
+  @Post('/send-bulk-sms')
+  sendBulkSms(
+    @Query('community_id') community_id: number,
+    @Body() body: { message: string },
+  ) {
+    return this.communityAlertsService.sendBulkSms(body.message, community_id);
+  }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Injectable,
   NotFoundException,
@@ -22,21 +23,26 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Future<NetResponse> {
     try {
-      const user = this.userRepository.create(createUserDto);
       const hashPassword = await bcrypt.hash(createUserDto.password, 10);
-      user.password = hashPassword;
+
+      const user = this.userRepository.create({
+        ...createUserDto,
+        password: hashPassword,
+      });
+
       const savedUser = await this.userRepository.save(user);
+
       await this.reputationService.create({
         user_id: savedUser.id,
         reputation_count: 0,
       });
-      return ResponseHelper.success<User & { reputation_count: number }>(
-        'User created successfully',
-        {
-          ...savedUser,
-          reputation_count: 0,
-        },
-      );
+
+      const { password, ...safeUser } = savedUser;
+
+      return ResponseHelper.success('User created successfully', {
+        ...safeUser,
+        reputation_count: 0,
+      });
     } catch (error) {
       return ResponseHelper.fromError(error);
     }

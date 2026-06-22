@@ -8,6 +8,8 @@ import { CommunityAlert } from './entities/community_alert.entity';
 import { Future, NetResponse, ResponseHelper } from 'src/helpers/net-response';
 import { AlertGateway } from 'src/gateway/gateway';
 import { Reputation } from 'src/reputation/entities/reputation.entity';
+import { TermiiService } from 'src/sms/sms.service';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class CommunityAlertsService {
@@ -17,6 +19,9 @@ export class CommunityAlertsService {
     private readonly alertGateway: AlertGateway,
     @InjectRepository(Reputation)
     private readonly reputationRepository: Repository<Reputation>,
+    private readonly smsService: TermiiService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
   async create(
@@ -82,7 +87,10 @@ export class CommunityAlertsService {
       });
       if (!reputation) return ResponseHelper.error('Reputation not found');
       reputation.reputation_count += 10;
+      alert.isVerified = true;
       await this.reputationRepository.save(reputation);
+      await this.communityAlertRepository.save(alert);
+      this.alertGateway.sendAlert(alert);
       return ResponseHelper.success<Reputation | null>(
         'Confirmed Alert successfully',
         null,
@@ -108,6 +116,27 @@ export class CommunityAlertsService {
       return ResponseHelper.success('Alert flagged as false', null);
     } catch (e) {
       return ResponseHelper.error(e as string);
+    }
+  }
+  async sendBulkSms(
+    message: string,
+    community_id: number,
+  ): Future<NetResponse> {
+    try {
+      const users = await this.userRepository.find({
+        where: {
+          community_id,
+        },
+      });
+      const results = await Promise.all(
+        users.map((user) => this.smsService.sendBulkSms([user.phone], message)),
+      );
+      return ResponseHelper.success(
+        'Messages sent successfully to users',
+        results,
+      );
+    } catch (e) {
+      return ResponseHelper.error(e as string, null);
     }
   }
 }
