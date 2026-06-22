@@ -51,4 +51,8 @@ export class AuthService {
       return ResponseHelper.error<User>('Invalid credentials');
     }
   }
+
+  pingServer() {
+    return ResponseHelper.success('Server Ready', null);
+  }
 }
